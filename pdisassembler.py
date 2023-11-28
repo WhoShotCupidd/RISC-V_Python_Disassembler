@@ -1,4 +1,5 @@
 import sys
+ret_return = 0
 
 
 def print_opcode(opcode):
@@ -6,7 +7,7 @@ def print_opcode(opcode):
 
 
 def disassemble_instruction(instruction):
-    # Extract opcode (bits 6-0)
+    # Extract opcode
     opcode = instruction & 0b1111111
 
     # Decode based on opcode
@@ -26,7 +27,10 @@ def disassemble_instruction(instruction):
         rd = ((instruction >> 7) & 0b11111)
         rs1 = ((instruction >> 15) & 0b11111)
         imm = ((instruction >> 20) & 0xFFF)
-        return f"JALR  x{rd}  x{rs1}  {imm}"
+        if (imm != 0):
+            return f"JALR  x{rd}  x{rs1}  {imm}"
+        else:
+            return f"ret"
     elif opcode == 0b1100011:
         # Decode branch instructions (I-format)
         funct3 = (instruction >> 12) & 0b111
@@ -84,7 +88,7 @@ def disassemble_file(file_path):
         # Read the file as binary
         binary_content = file.read()
 
-        # Flag to determine whether to print lines
+        # Flag to determine whether to print lines (229 Flag)
         print_line = False
 
         # Iterate over 4-byte chunks and disassemble each instruction
@@ -103,7 +107,7 @@ def disassemble_file(file_path):
 
             if instruction_str.startswith("ADDI  x0  x0  229"):
                 print_line = not print_line
-                continue  # Skip printing this line
+                continue
 
             if print_line:
                 print(instruction_str)
@@ -117,9 +121,8 @@ def disassemble_single_instruction(instruction):
     print(disassemble_instruction(instruction))
 
 
-
 def main():
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 3 and len(sys.argv) != 4:
         print("")
         print("Usage: python3 pdissambler.py -[OPTION] input")
         print("")
@@ -132,6 +135,10 @@ def main():
 
     option = sys.argv[1]
     input_arg = sys.argv[2]
+    if (len(sys.argv) == 4):
+        classifer = sys.argv[3]
+        if classifer == '-ret':
+            ret_return = 1;
 
     if option == '-f':
         disassemble_file(input_arg)

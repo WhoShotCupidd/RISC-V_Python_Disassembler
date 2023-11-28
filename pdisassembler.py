@@ -1,5 +1,4 @@
 import sys
-ret_return = 0
 
 
 def print_opcode(opcode):
@@ -27,10 +26,7 @@ def disassemble_instruction(instruction):
         rd = ((instruction >> 7) & 0b11111)
         rs1 = ((instruction >> 15) & 0b11111)
         imm = ((instruction >> 20) & 0xFFF)
-        if (imm != 0):
-            return f"JALR  x{rd}  x{rs1}  {imm}"
-        else:
-            return f"ret"
+        return f"JALR  x{rd}  x{rs1}  {imm}"
     elif opcode == 0b1100011:
         # Decode branch instructions (I-format)
         funct3 = (instruction >> 12) & 0b111
@@ -137,9 +133,8 @@ def main():
     input_arg = sys.argv[2]
     if (len(sys.argv) == 4):
         classifer = sys.argv[3]
-        if classifer == '-ret':
-            ret_return = 1;
-
+        # if classifer == "-ret":
+            
     if option == '-f':
         disassemble_file(input_arg)
     elif option == '-i':

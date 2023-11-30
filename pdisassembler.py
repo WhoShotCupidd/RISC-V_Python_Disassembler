@@ -5,7 +5,7 @@ def print_opcode(opcode):
     return f"Opcode: {bin(opcode)[2:]:>7}"
 
 
-def disassemble_instruction(instruction):
+def disassemble_instruction(instruction, ret_return, flag_229):
     # Extract opcode
     opcode = instruction & 0b1111111
 
@@ -26,7 +26,10 @@ def disassemble_instruction(instruction):
         rd = ((instruction >> 7) & 0b11111)
         rs1 = ((instruction >> 15) & 0b11111)
         imm = ((instruction >> 20) & 0xFFF)
-        return f"JALR  x{rd}  x{rs1}  {imm}"
+        if (imm == 0 and ret_return):
+            return f"ret"
+        else:
+            return f"JALR  x{rd}  x{rs1}  {imm}"
     elif opcode == 0b1100011:
         # Decode branch instructions (I-format)
         funct3 = (instruction >> 12) & 0b111
@@ -75,18 +78,21 @@ def disassemble_instruction(instruction):
         else:
             return f"Unknown R-type instruction: {print_opcode(opcode)}"
 
+    elif opcode == 0b1110011:
+        return f"ecall"
+
     else:
         return f"Unknown instruction: {print_opcode(opcode)}"
 
 
-def disassemble_file(file_path):
+def disassemble_file(file_path, ret_return, flag_229):
     with open(file_path, 'rb') as file:
         # Read the file as binary
         binary_content = file.read()
 
         # Flag to determine whether to print lines (229 Flag)
         print_line = False
-
+        
         # Iterate over 4-byte chunks and disassemble each instruction
         for i in range(0, len(binary_content), 4):
             instruction_bytes = binary_content[i:i + 4]
@@ -99,13 +105,13 @@ def disassemble_file(file_path):
             instruction = int.from_bytes(instruction_bytes, byteorder='little')
 
             # Disassemble and print the instruction
-            instruction_str = disassemble_instruction(instruction)
+            instruction_str = disassemble_instruction(instruction, ret_return, flag_229)
 
             if instruction_str.startswith("ADDI  x0  x0  229"):
                 print_line = not print_line
                 continue
 
-            if print_line:
+            if print_line or flag_229:
                 print(instruction_str)
 
 
@@ -118,7 +124,7 @@ def disassemble_single_instruction(instruction):
 
 
 def main():
-    if len(sys.argv) != 3 and len(sys.argv) != 4:
+    if len(sys.argv) <3:
         print("")
         print("Usage: python3 pdissambler.py -[OPTION] input")
         print("")
@@ -131,12 +137,19 @@ def main():
 
     option = sys.argv[1]
     input_arg = sys.argv[2]
-    if (len(sys.argv) == 4):
-        classifer = sys.argv[3]
-        # if classifer == "-ret":
+    ret_return = 0
+    flag_229 = 0 
+    
+    for i in range(2,len(sys.argv)):
+        classifer = sys.argv[i]
+        match classifer:
+            case "-ret":
+                ret_return = 1
+            case "-no229":
+                flag_229 = 1
             
     if option == '-f':
-        disassemble_file(input_arg)
+        disassemble_file(input_arg, ret_return, flag_229)
     elif option == '-i':
         disassemble_single_instruction(input_arg)
     else:

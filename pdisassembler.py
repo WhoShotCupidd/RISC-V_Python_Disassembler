@@ -115,12 +115,12 @@ def disassemble_file(file_path, ret_return, flag_229):
                 print(instruction_str)
 
 
-def disassemble_single_instruction(instruction):
+def disassemble_single_instruction(instruction, ret_return, flag_229):
     # Convert bytes to integer (little-endian)
     instruction = int(instruction, 16)
 
     # Disassemble and print the instruction
-    print(disassemble_instruction(instruction))
+    print(disassemble_instruction(instruction, ret_return, flag_229))
 
 
 def main():
@@ -152,7 +152,7 @@ def main():
     if option == '-f':
         disassemble_file(input_arg, ret_return, flag_229)
     elif option == '-i':
-        disassemble_single_instruction(input_arg)
+        disassemble_single_instruction(input_arg, ret_return, flag_229)
     else:
         print("Invalid option. Usage: python3 pdissambler.py -[OPTION] input\n")
         exit(1)

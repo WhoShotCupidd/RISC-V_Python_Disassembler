@@ -124,11 +124,12 @@ def disassemble_single_instruction(instruction):
 
 
 def main():
-    if len(sys.argv) <3:
+    
+    if len(sys.argv) < 3:
         print("")
-        print("Usage: python3 pdissambler.py -[OPTION] input")
+        print("Usage: python3 pdissambler.py -[OPTIONS] input")
         print("")
-        print("\t[OPTION]: -i (singular instruction) -f (file)")
+        print("\t[OPTIONS]:\n\t -i (singular instruction)\n\t -f (file)\n\t -ret (JALR  x0  x1  0 -> ret)\n\t -no229 (shows all instructions not just ones between addi x0, x0, 229)")
         print("")
         print("\tex. python3 pdisassembler.py -i FF5FF06F")
         print("\tex. python3 pdisassembler.py -f factorial.binary")
